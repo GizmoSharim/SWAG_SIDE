@@ -3,26 +3,34 @@ const prisma = new PrismaClient();
 
 const OrderController = {
   async store(req, res) {
+    console.log("Dados recebidos no Body:", req.body); // Isso vai nos ajudar a ver se o dado chegou
+
     try {
+      // Verificando se o prisma.order existe antes de tentar criar
+      if (!prisma.order) {
+        throw new Error("A tabela 'order' não foi encontrada no Prisma. Verifique seu schema.prisma");
+      }
+
       const { customerName, whatsapp, total, items } = req.body;
 
-      // Salvamos o pedido para você não perder o controle das vendas
       const order = await prisma.order.create({
         data: {
-          customerName,
-          whatsapp,
-          total,
-          items, // Aqui salvamos a lista de roupas que ele escolheu
+          customerName: customerName,
+          whatsapp: whatsapp,
+          total: Number(total), 
+          items: items, 
           status: "AGUARDANDO_WHATSAPP" 
         }
       });
 
-      // Retornamos o ID do pedido. 
-      // O Frontend vai usar esse ID para montar o link do WhatsApp
       return res.status(201).json(order);
+
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: "Erro ao registrar intenção de compra" });
+      console.error("ERRO NO CONTROLADOR:", error);
+      return res.status(500).json({ 
+        error: "Erro ao registrar intenção de compra",
+        details: error.message 
+      });
     }
   }
 };

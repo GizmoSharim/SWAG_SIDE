@@ -15,6 +15,7 @@ async function main() {
           { url: "https://images.unsplash.com/photo-1562157873-818bc0726f68?q=80&w=500" }
         ]
       }
+      
     }
   })
   console.log("✅ Produto de teste criado com sucesso!")
