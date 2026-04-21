@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 const OrderController = {
   async store(req, res) {
-    console.log("Dados recebidos no Body:", req.body); // Isso vai nos ajudar a ver se o dado chegou
+    console.log("Dados recebidos no Body:", req.body); 
 
     try {
       // Verificando se o prisma.order existe antes de tentar criar

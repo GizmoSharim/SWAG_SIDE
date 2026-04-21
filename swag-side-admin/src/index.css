@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Isso aqui força o Tailwind a procurar classes no seu projeto todo */
+@source "../src";
