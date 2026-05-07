@@ -5,6 +5,7 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "dotenv": "^17.4.2",
     "prisma": "^6.19.3"
   }
 }
