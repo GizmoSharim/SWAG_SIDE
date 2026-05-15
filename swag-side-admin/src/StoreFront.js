@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import ProductCard from './ProductCard';
+import { api } from './api';
 
 function StoreFront({ cart, addToCart }) {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:3333/products')
+    api.get('/products')
       .then(response => setProducts(response.data))
       .catch(error => console.error("Erro na vitrine:", error));
   }, []);

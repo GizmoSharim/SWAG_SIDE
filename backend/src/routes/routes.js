@@ -7,6 +7,22 @@ const OrderController = require('../controllers/OrderController');
 
 // --- ROTAS PARA O CATÁLOGO E PAINEL ---
 
+router.get('/', (req, res) => {
+  return res.json({
+    ok: true,
+    message: 'API Sweg Side online',
+    routes: {
+      products: '/products',
+      orders: '/orders',
+      health: '/health'
+    }
+  });
+});
+
+router.get('/health', (req, res) => {
+  return res.json({ ok: true });
+});
+
 // Listar produtos 
 router.get('/products', ProductController.index);
 

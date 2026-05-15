@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import AddProductForm from './AddProductForm';
+import { api, getApiError } from './api';
 
 function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -8,7 +8,7 @@ function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState(null);
 
   const fetchProducts = () => {
-    axios.get('http://localhost:3333/products')
+    api.get('/products')
       .then(response => setProducts(response.data))
       .catch(error => console.error("Erro ao carregar produtos:", error));
   };
@@ -20,9 +20,9 @@ function AdminDashboard() {
   const handleDelete = async (id) => {
     if (window.confirm("Deseja mesmo excluir este produto?")) {
       try {
-        await axios.delete(`http://localhost:3333/products/${id}`);
+        await api.delete(`/products/${id}`);
         setProducts(products.filter(p => p.id !== id));
-      } catch (error) { alert("Erro ao excluir"); }
+      } catch (error) { alert(`Erro ao excluir: ${getApiError(error)}`); }
     }
   };
 

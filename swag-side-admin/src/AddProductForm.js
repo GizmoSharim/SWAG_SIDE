@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api, getApiError } from './api';
 
 function AddProductForm({ editingProduct, onProductSaved }) {
   const [formData, setFormData] = useState({
@@ -27,21 +27,21 @@ function AddProductForm({ editingProduct, onProductSaved }) {
     const productData = {
       ...formData,
       price: parseFloat(formData.price),
-      sizes: formData.sizes.split(',').map(s => s.trim()),
-      images: formData.images.split(',').map(url => url.trim())
+      sizes: formData.sizes.split(',').map(s => s.trim()).filter(Boolean),
+      images: formData.images.split(',').map(url => url.trim()).filter(Boolean)
     };
 
     try {
       if (editingProduct) {
-        await axios.put(`http://localhost:3333/products/${editingProduct.id}`, productData);
+        await api.put(`/products/${editingProduct.id}`, productData);
         alert("🔄 Produto atualizado!");
       } else {
-        await axios.post('http://localhost:3333/products', productData);
+        await api.post('/products', productData);
         alert("✅ Produto cadastrado!");
       }
       onProductSaved();
     } catch (error) {
-      alert("❌ Erro ao salvar produto.");
+      alert(`Erro ao salvar produto: ${getApiError(error)}`);
     }
   };
 

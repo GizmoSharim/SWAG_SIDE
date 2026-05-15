@@ -7,7 +7,8 @@ const ProductController = {
       const products = await ProductService.listAllProducts();
       return res.json(products);
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao buscar produtos" });
+      console.error('Erro ao buscar produtos:', error);
+      return res.status(500).json({ error: "Erro ao buscar produtos", details: error.message });
     }
   },
 
@@ -17,7 +18,8 @@ const ProductController = {
       const product = await ProductService.createProduct(req.body);
       return res.status(201).json(product);
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao criar produto" });
+      console.error('Erro ao criar produto:', error);
+      return res.status(500).json({ error: "Erro ao criar produto", details: error.message });
     }
   },
 
@@ -28,7 +30,8 @@ const ProductController = {
       const updatedProduct = await ProductService.updateProduct(id, req.body);
       return res.json(updatedProduct);
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao atualizar produto" });
+      console.error('Erro ao atualizar produto:', error);
+      return res.status(500).json({ error: "Erro ao atualizar produto", details: error.message });
     }
   },
 
@@ -39,7 +42,8 @@ const ProductController = {
       await ProductService.deleteProduct(id);
       return res.status(204).send();
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao deletar produto" });
+      console.error('Erro ao deletar produto:', error);
+      return res.status(500).json({ error: "Erro ao deletar produto", details: error.message });
     }
   }
 };

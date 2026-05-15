@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "prisma:generate": "prisma generate"
+  },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "cors": "^2.8.6",
