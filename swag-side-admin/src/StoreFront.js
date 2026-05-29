@@ -30,7 +30,7 @@ function StoreFront({ cart, addToCart }) {
     const mensagem = encodeURIComponent(
       ` *SWAG_SIDE - NOVO DROP REQUEST*\n` +
       `________________________________\n\n` +
-      `Salve, pessoal da SwegSide! Acabei de montar meu kit no site e quero fechar:\n\n` +
+      `Salve, pessoal da Swag Side! Acabei de montar meu kit no site e quero fechar:\n\n` +
       `${listaTexto}\n\n` +
       ` *VALOR TOTAL:* R$ ${total.toFixed(2)}\n` +
       `________________________________\n\n` +

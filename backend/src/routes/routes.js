@@ -10,7 +10,7 @@ const OrderController = require('../controllers/OrderController');
 router.get('/', (req, res) => {
   return res.json({
     ok: true,
-    message: 'API Sweg Side online',
+    message: 'API Swag Side online',
     routes: {
       products: '/products',
       orders: '/orders',

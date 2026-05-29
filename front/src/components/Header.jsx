@@ -6,7 +6,7 @@ export function Header() {
 
   return (
     <header className={styles.header}>
-      <div className={styles.logo}>SWEG SIDE</div>
+      <div className={styles.logo}>SWAG SIDE</div>
 
       <nav className={styles.nav}>
         <a className={styles.active} href="#new">Drop</a>

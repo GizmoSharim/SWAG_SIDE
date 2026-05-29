@@ -140,7 +140,7 @@ function Footer() {
 
     
 
-      <p className={styles.copy}>Sweg Side - Loja Online | Design & Atitude</p>
+      <p className={styles.copy}>Swag Side - Loja Online | Design & Atitude</p>
     </footer>
   );
 }

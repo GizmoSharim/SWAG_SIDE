@@ -31,7 +31,7 @@
 }
 
 .hero::before {
-  content: "SWEG SIDE";
+  content: "SWAG SIDE";
   position: absolute;
   right: clamp(18px, 5vw, 96px);
   bottom: 12vh;
