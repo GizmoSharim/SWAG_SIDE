@@ -2,11 +2,11 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  height: 82px;
+  height: 78px;
   padding: 0 clamp(18px, 5vw, 96px);
-  background: rgba(8, 8, 8, 0.82);
-  border-bottom: 1px solid rgba(215, 255, 50, 0.24);
-  backdrop-filter: blur(18px);
+  background: rgba(250, 248, 241, 0.92);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -16,8 +16,8 @@
 .logo {
   position: relative;
   width: fit-content;
-  color: #f5f1e8;
-  font-size: 34px;
+  color: #050505;
+  font-size: 32px;
   font-weight: 900;
   line-height: 0.9;
   letter-spacing: 0;
@@ -31,12 +31,12 @@
   right: -42px;
   bottom: -12px;
   padding: 3px 6px;
-  background: #d7ff32;
+  background: #e7d9b8;
   color: #050505;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1px;
-  transform: rotate(-4deg);
+  transform: none;
 }
 
 .nav {
@@ -48,15 +48,15 @@
 
 .nav a {
   position: relative;
-  color: rgba(245, 241, 232, 0.78);
+  color: rgba(5, 5, 5, 0.7);
   text-decoration: none;
   text-transform: uppercase;
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.8px;
   line-height: 1;
   white-space: nowrap;
-  padding: 11px 13px;
+  padding: 10px 12px;
   border: 1px solid transparent;
   transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
@@ -67,9 +67,9 @@
 
 .nav a:hover,
 .nav .active {
-  border-color: rgba(215, 255, 50, 0.44);
-  background: rgba(215, 255, 50, 0.08);
-  color: #d7ff32;
+  border-color: rgba(5, 5, 5, 0.28);
+  background: #fff;
+  color: #050505;
 }
 
 .actions {
@@ -85,9 +85,9 @@
   position: relative;
   width: 42px;
   height: 42px;
-  border: 1px solid rgba(245, 241, 232, 0.22);
-  background: rgba(245, 241, 232, 0.05);
-  color: #f5f1e8;
+  border: 1px solid rgba(5, 5, 5, 0.22);
+  background: #fff;
+  color: #050505;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -96,9 +96,9 @@
 
 .iconBtn:hover,
 .cartBtn:hover {
-  border-color: #d7ff32;
-  color: #d7ff32;
-  transform: translateY(-1px);
+  border-color: #050505;
+  color: #050505;
+  transform: none;
 }
 
 .iconBtn svg,
@@ -119,10 +119,10 @@
   min-width: 20px;
   height: 20px;
   padding: 0 5px;
-  border: 1px solid #090909;
+  border: 1px solid #fff;
   border-radius: 0;
-  background: #ff4b1f;
-  color: #fff9ef;
+  background: #050505;
+  color: #fff;
   font-size: 11px;
   font-weight: 800;
   line-height: 20px;
@@ -131,8 +131,9 @@
 
 @media (max-width: 960px) {
   .header {
+    background: rgba(247, 246, 242, 0.94);
     grid-template-columns: 1fr auto;
-    height: 72px;
+    height: 70px;
   }
 
   .nav {
@@ -140,7 +141,13 @@
   }
 
   .logo {
+    color: #050505;
     font-size: 30px;
+  }
+
+  .logo::after {
+    background: #050505;
+    color: #fff;
   }
 }
 

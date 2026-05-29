@@ -12,7 +12,7 @@ function StoreFront({ cart, addToCart }) {
   }, []);
 
   const checkoutWhatsApp = () => {
-    const numeroZap = "5592984052457"; // TROCA PRO NUMERO DO NIKOLAS
+    const numeroZap = "5592992284048"; // TROCA PRO NUMERO DO NIKOLAS
     
     // 1. Agrupar itens repetidos e calcular subtotal
     const resumoItens = cart.reduce((acc, item) => {

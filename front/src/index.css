@@ -16,11 +16,8 @@ body {
 
 body {
   font-family: Inter, "Arial Narrow", Arial, Helvetica, sans-serif;
-  background:
-    radial-gradient(circle at 14% -10%, rgba(202, 255, 0, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 8%, rgba(255, 61, 0, 0.16), transparent 28%),
-    #090909;
-  color: #f5f1e8;
+  background: #f7f6f2;
+  color: #090909;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -34,9 +31,9 @@ a { color: inherit; }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::selection {
-  background: #d7ff32;
-  color: #050505;
+  background: #050505;
+  color: #fff;
 }
 
-::-webkit-scrollbar-thumb { background: #d7ff32; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #ff4b1f; }
+::-webkit-scrollbar-thumb { background: #111; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }

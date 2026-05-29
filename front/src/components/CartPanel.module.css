@@ -15,7 +15,7 @@
   transition: color 0.15s;
 }
 
-.backBtn:hover { color: #d7ff32; }
+.backBtn:hover { color: #fff; }
 
 .formBody {
   flex: 1;
@@ -40,7 +40,7 @@
 
 .label {
   font-size: 11px;
-  color: #d7ff32;
+  color: #fff;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   font-weight: 500;
@@ -60,7 +60,7 @@
 }
 
 .input::placeholder { color: rgba(255, 249, 239, 0.28); }
-.input:focus { border-color: #d7ff32; }
+.input:focus { border-color: #fff; }
 
 .textarea {
   min-height: 82px;
@@ -80,7 +80,7 @@
 
 .summaryTitle {
   font-size: 10px;
-  color: #ff4b1f;
+  color: #fff;
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 4px;
@@ -127,9 +127,9 @@
   width: 410px;
   max-width: 100vw;
   background:
-    linear-gradient(135deg, rgba(215, 255, 50, 0.08), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 28%),
     #080808;
-  border-left: 1px solid rgba(215, 255, 50, 0.32);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   flex-direction: column;
   z-index: 201;
@@ -170,7 +170,7 @@
   transition: color 0.15s;
 }
 
-.closeBtn:hover { color: #ff4b1f; }
+.closeBtn:hover { color: #fff; }
 
 .items {
   flex: 1;
@@ -266,8 +266,8 @@
 }
 
 .qtyBtn:hover {
-  border-color: #d7ff32;
-  color: #d7ff32;
+  border-color: #fff;
+  color: #fff;
 }
 
 .qty {
@@ -297,12 +297,12 @@
   transition: color 0.15s;
 }
 
-.removeBtn:hover { color: #ff4b1f; }
+.removeBtn:hover { color: #fff; }
 
 .itemPrice {
   font-family: inherit;
   font-size: 18px;
-  color: #d7ff32;
+  color: #fff;
   font-weight: 900;
 }
 
@@ -346,8 +346,8 @@
 
 .whatsappBtn {
   width: 100%;
-  background: #d7ff32;
-  border: 1px solid #d7ff32;
+  background: #fff;
+  border: 1px solid #fff;
   color: #050505;
   font-family: inherit;
   font-size: 13px;
@@ -365,9 +365,9 @@
 }
 
 .whatsappBtn:hover:not(:disabled) {
-  background: #ff4b1f;
-  border-color: #ff4b1f;
-  color: #fff9ef;
+  background: #050505;
+  border-color: #fff;
+  color: #fff;
 }
 .whatsappBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 

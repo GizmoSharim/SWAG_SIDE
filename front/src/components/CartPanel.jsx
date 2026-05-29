@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { createOrder } from '../services/api';
 import styles from './CartPanel.module.css';
 
-const WHATSAPP_STORE = import.meta.env.VITE_WHATSAPP_NUMBER || '5592984052457';
+const WHATSAPP_STORE = import.meta.env.VITE_WHATSAPP_NUMBER || '5592992284048';
 const INITIAL_FORM   = { customerName: '', whatsapp: '', deliveryAddress: '' };
 
 export function CartPanel() {
