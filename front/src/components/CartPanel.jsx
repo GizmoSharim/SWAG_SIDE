@@ -43,7 +43,7 @@ export function CartPanel() {
       ` *SWAG_SIDE - NOVO DROP REQUEST*`,
       `________________________________`,
       ``,
-      `Salve, pessoal da SwegSide! Acabei de montar meu kit no site e quero fechar:`,
+      `Salve, pessoal da SwagSide! Acabei de montar meu kit no site e quero fechar:`,
       ``,
       listaTexto,
       ``,
