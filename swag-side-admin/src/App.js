@@ -71,15 +71,19 @@ function AppShell() {
   );
 
   const addToCart = (product, selectedSize, quantity = 1) => {
+    const stock = Number(product.stock || 0);
+    if (stock <= 0) return;
+
     const imageUrl = product.images?.[0]?.url || product.imageUrl || '';
     const cartKey = `${product.id}-${selectedSize || 'unico'}`;
+    const nextQuantity = Math.max(1, Math.min(Number(quantity) || 1, stock));
 
     setCart((currentCart) => {
       const existing = currentCart.find((item) => item.cartKey === cartKey);
       if (existing) {
         return currentCart.map((item) =>
           item.cartKey === cartKey
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: Math.min(item.quantity + nextQuantity, item.stock || stock) }
             : item
         );
       }
@@ -93,7 +97,8 @@ function AppShell() {
           price: Number(product.price),
           imageUrl,
           selectedSize: selectedSize || 'Unico',
-          quantity
+          quantity: nextQuantity,
+          stock
         }
       ];
     });
@@ -105,11 +110,17 @@ function AppShell() {
   };
 
   const updateCartQuantity = (cartKey, quantity) => {
-    const nextQuantity = Math.max(1, Number(quantity) || 1);
     setCart((currentCart) =>
-      currentCart.map((item) =>
-        item.cartKey === cartKey ? { ...item, quantity: nextQuantity } : item
-      )
+      currentCart.map((item) => {
+        if (item.cartKey !== cartKey) return item;
+
+        const maxStock = Number(item.stock || 0);
+        const nextQuantity = Math.max(1, Number(quantity) || 1);
+        return {
+          ...item,
+          quantity: maxStock > 0 ? Math.min(nextQuantity, maxStock) : nextQuantity
+        };
+      })
     );
   };
 

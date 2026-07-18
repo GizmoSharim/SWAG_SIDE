@@ -8,6 +8,8 @@ function ProductCard({ product, addToCart, badge, variant = '' }) {
   const [selectedSize, setSelectedSize] = useState(sizes[0] || 'Unico');
   const mainImage = product.images?.[0]?.url || product.imageUrl || fallbackImage;
   const colors = product.colors || ['#111111', '#ffffff', '#8d8a82'];
+  const stock = Number(product.stock || 0);
+  const isSoldOut = stock <= 0;
 
   return (
     <article className={`product-card ${variant ? `product-card-${variant}` : ''}`}>
@@ -45,8 +47,8 @@ function ProductCard({ product, addToCart, badge, variant = '' }) {
         </div>
       )}
 
-      <button className="add-button" onClick={() => addToCart(product, selectedSize)}>
-        ADICIONAR
+      <button className="add-button" onClick={() => addToCart(product, selectedSize)} disabled={isSoldOut}>
+        {isSoldOut ? 'ESGOTADO' : 'ADICIONAR'}
       </button>
     </article>
   );

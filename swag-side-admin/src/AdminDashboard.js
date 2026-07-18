@@ -58,13 +58,14 @@ function AdminDashboard() {
         await api.post('/products', productData);
       }
       fetchProducts();
+      setShowForm(false);
+      setEditingProduct(null);
+      return true;
     } catch (error) {
       alert(error.response?.data?.error || 'Erro ao salvar produto.');
       setLoading(false);
+      return false;
     }
-
-    setShowForm(false);
-    setEditingProduct(null);
   };
 
   const handleDelete = async (id) => {

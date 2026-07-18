@@ -16,6 +16,8 @@ function Checkout({ cart, total, clearCart }) {
     zip: '',
     notes: ''
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const itemCount = useMemo(
     () => cart.reduce((sum, item) => sum + item.quantity, 0),
@@ -30,6 +32,8 @@ function Checkout({ cart, total, clearCart }) {
   const finishCheckout = async (event) => {
     event.preventDefault();
     if (!cart.length) return;
+    setSubmitting(true);
+    setError('');
 
     const items = cart
       .map((item) => {
@@ -40,29 +44,35 @@ function Checkout({ cart, total, clearCart }) {
 
     const address = `${form.street}, ${form.number} - ${form.neighborhood}, ${form.city}/${form.state}, CEP ${form.zip}`;
 
-    await api.post('/orders', {
-      customerName: form.name,
-      whatsapp: form.phone,
-      total,
-      items: cart.map((item) => ({
-        productId: Number.isInteger(Number(item.id)) ? Number(item.id) : undefined,
-        name: item.name,
-        price: Number(item.price),
-        selectedSize: item.selectedSize,
-        quantity: item.quantity,
-        subtotal: Number(item.price) * item.quantity
-      })),
-      address: {
-        street: form.street,
-        number: form.number,
-        neighborhood: form.neighborhood,
-        city: form.city,
-        state: form.state.toUpperCase(),
-        zip: form.zip,
-        complement: form.notes
-      },
-      notes: form.notes
-    }).catch(() => {});
+    try {
+      await api.post('/orders', {
+        customerName: form.name,
+        whatsapp: form.phone,
+        total,
+        items: cart.map((item) => ({
+          productId: Number.isInteger(Number(item.id)) ? Number(item.id) : undefined,
+          name: item.name,
+          price: Number(item.price),
+          selectedSize: item.selectedSize,
+          quantity: item.quantity,
+          subtotal: Number(item.price) * item.quantity
+        })),
+        address: {
+          street: form.street,
+          number: form.number,
+          neighborhood: form.neighborhood,
+          city: form.city,
+          state: form.state.toUpperCase(),
+          zip: form.zip,
+          complement: form.notes
+        },
+        notes: form.notes
+      });
+    } catch {
+      setSubmitting(false);
+      setError('Nao foi possivel registrar o pedido. Confira o backend e tente novamente.');
+      return;
+    }
 
     const message = encodeURIComponent(
       `SWEG SIDE - NOVO PEDIDO\n\n` +
@@ -140,7 +150,11 @@ function Checkout({ cart, total, clearCart }) {
             <textarea name="notes" rows="4" value={form.notes} onChange={handleChange} />
           </label>
 
-          <button className="primary-button wide" type="submit">FINALIZAR COMPRA</button>
+          {error && <p className="form-error">{error}</p>}
+
+          <button className="primary-button wide" type="submit" disabled={submitting}>
+            {submitting ? 'REGISTRANDO PEDIDO...' : 'FINALIZAR COMPRA'}
+          </button>
         </form>
 
         <aside className="order-summary">

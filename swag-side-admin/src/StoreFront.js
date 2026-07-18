@@ -11,6 +11,9 @@ const bannerTwo = 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?
 function StoreFront({ cart, total, addToCart, removeFromCart, updateCartQuantity, clearCart, cartOpen, closeCart }) {
   const [products, setProducts] = useState(getStoredProducts);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('Todos');
 
   useEffect(() => {
     api.get('/products')
@@ -18,21 +21,30 @@ function StoreFront({ cart, total, addToCart, removeFromCart, updateCartQuantity
         const apiProducts = Array.isArray(response.data) && response.data.length ? response.data : initialProducts;
         setProducts(apiProducts);
         storeProducts(apiProducts);
+        setError('');
       })
       .catch(() => {
         const seeded = getStoredProducts();
-        setProducts(seeded.length ? seeded : initialProducts);
-        storeProducts(seeded.length ? seeded : initialProducts);
+        const fallbackProducts = seeded.length ? seeded : initialProducts;
+        setProducts(fallbackProducts);
+        storeProducts(fallbackProducts);
+        setError('');
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const featuredProducts = useMemo(
-    () => products.filter((product) => product.featured).slice(0, 4),
+  const categories = useMemo(
+    () => ['Todos', ...new Set(products.map((product) => product.category).filter(Boolean))],
     [products]
   );
 
-  const fallbackFeatured = featuredProducts.length >= 4 ? featuredProducts : initialProducts;
+  const visibleProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = category === 'Todos' || product.category === category;
+      return matchesSearch && matchesCategory;
+    });
+  }, [category, products, search]);
 
   return (
     <main className="store-page">
@@ -48,20 +60,41 @@ function StoreFront({ cart, total, addToCart, removeFromCart, updateCartQuantity
 
       <section id="destaques" className="featured-section">
         <div className="section-heading">
-          <h2>DESTAQUES DA SEMANA</h2>
-          <span>{loading ? 'CARREGANDO' : `${products.length} PECAS`}</span>
+          <div>
+            <h2>PRODUTOS</h2>
+            <span>{loading ? 'CARREGANDO' : `${visibleProducts.length} PECA(S)`}</span>
+          </div>
+          <div className="catalog-filters">
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="BUSCAR PRODUTO"
+              aria-label="Buscar produto"
+            />
+            <select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filtrar categoria">
+              {categories.map((item) => <option key={item}>{item}</option>)}
+            </select>
+          </div>
         </div>
 
-        <div className="product-grid">
-          {fallbackFeatured.slice(0, 4).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              addToCart={addToCart}
-              badge={product.featured ? 'HOT' : ''}
-            />
-          ))}
-        </div>
+        {error && <div className="empty-state">{error}</div>}
+
+        {!loading && !error && visibleProducts.length === 0 && (
+          <div className="empty-state">Nenhum produto encontrado.</div>
+        )}
+
+        {visibleProducts.length > 0 && (
+          <div className="product-grid">
+            {visibleProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                addToCart={addToCart}
+                badge={product.featured ? 'HOT' : ''}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <section id="drop" className="bento-section">
@@ -108,7 +141,7 @@ function StoreFront({ cart, total, addToCart, removeFromCart, updateCartQuantity
             <div className="cart-items">
               {cart.map((item) => (
                 <div className="cart-item" key={item.cartKey}>
-                  <img src={item.imageUrl || initialProducts[0].images[0].url} alt={item.name} />
+                  {item.imageUrl ? <img src={item.imageUrl} alt={item.name} /> : <div className="cart-thumb-empty">SEM FOTO</div>}
                   <div>
                     <h3>{item.name}</h3>
                     <p>Tam: {item.selectedSize || 'Unico'}</p>

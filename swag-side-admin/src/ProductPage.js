@@ -34,6 +34,8 @@ function ProductPage({ addToCart }) {
   }, [id]);
 
   const images = useMemo(() => product?.images?.length ? product.images : [{ url: fallbackImage }], [product]);
+  const stock = Number(product?.stock || 0);
+  const isSoldOut = stock <= 0;
 
   if (loading) {
     return <main className="product-page"><div className="empty-state">CARREGANDO PRODUTO...</div></main>;
@@ -99,13 +101,19 @@ function ProductPage({ addToCart }) {
             <span>QUANTIDADE</span>
             <div className="qty-inline">
               <button onClick={() => setQuantity((value) => Math.max(1, value - 1))}>-</button>
-              <input value={quantity} onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))} />
-              <button onClick={() => setQuantity((value) => value + 1)}>+</button>
+              <input
+                value={quantity}
+                onChange={(event) => {
+                  const nextValue = Math.max(1, Number(event.target.value) || 1);
+                  setQuantity(stock > 0 ? Math.min(nextValue, stock) : nextValue);
+                }}
+              />
+              <button onClick={() => setQuantity((value) => stock > 0 ? Math.min(value + 1, stock) : value + 1)}>+</button>
             </div>
           </div>
 
-          <button className="primary-button wide" onClick={() => addToCart(product, selectedSize, quantity)}>
-            ADICIONAR AO CARRINHO
+          <button className="primary-button wide" onClick={() => addToCart(product, selectedSize, quantity)} disabled={isSoldOut}>
+            {isSoldOut ? 'PRODUTO ESGOTADO' : 'ADICIONAR AO CARRINHO'}
           </button>
         </div>
       </section>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import api from './services/api';
 
 const emptyForm = {
   name: '',
@@ -15,6 +16,7 @@ const emptyForm = {
 function AddProductForm({ editingProduct, onProductSaved, onCancel }) {
   const [formData, setFormData] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (editingProduct) {
@@ -56,28 +58,38 @@ function AddProductForm({ editingProduct, onProductSaved, onCancel }) {
       images: formData.images.split(',').map((url) => ({ url: url.trim() })).filter((image) => image.url)
     };
 
-    await onProductSaved(productData);
-    setFormData(emptyForm);
-    setSaving(false);
+    try {
+      const saved = await onProductSaved(productData);
+      if (saved === false) return;
+      setFormData(emptyForm);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
-    Promise.all(files.map((file) => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    })))
-      .then((urls) => {
-        setFormData((current) => ({
-          ...current,
-          images: [current.images, ...urls].filter(Boolean).join(', ')
-        }));
-      })
-      .catch(() => alert('Nao foi possivel carregar a imagem.'));
+    const data = new FormData();
+    files.forEach((file) => data.append('images', file));
+
+    setUploading(true);
+    try {
+      const response = await api.post('/uploads/images', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const urls = (response.data.images || []).map((image) => image.url).filter(Boolean);
+      setFormData((current) => ({
+        ...current,
+        images: [current.images, ...urls].filter(Boolean).join(', ')
+      }));
+    } catch {
+      alert('Nao foi possivel enviar a imagem. Confira login de admin e Cloudinary.');
+    } finally {
+      setUploading(false);
+      event.target.value = '';
+    }
   };
 
   return (
@@ -138,15 +150,16 @@ function AddProductForm({ editingProduct, onProductSaved, onCancel }) {
 
       <label>
         Upload de imagens
-        <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
+        <input type="file" accept="image/*" multiple onChange={handleImageUpload} disabled={uploading} />
       </label>
+      {uploading && <p className="form-hint">Enviando imagem...</p>}
 
       <label className="checkbox-line">
         <input name="featured" type="checkbox" checked={formData.featured} onChange={handleChange} />
         Marcar como destaque da semana
       </label>
 
-      <button className="primary-button wide" disabled={saving}>
+      <button className="primary-button wide" disabled={saving || uploading}>
         {saving ? 'SALVANDO...' : editingProduct ? 'SALVAR ALTERACOES' : 'CADASTRAR PRODUTO'}
       </button>
     </form>
