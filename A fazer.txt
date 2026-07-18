@@ -1,0 +1,28 @@
+Mudanças possíveis escaláveis:
+
+- 
+
+
+
+
+Remoções de componentes:
+
+-
+
+
+Alteração de Componente:
+
+- arredondamento de rodapé
+
+
+
+
+Adição de componente:
+
+- resumo de venda
+
+Ideia:
+
+- Imagens de artistas(puxando o google separator).
+
+- 

@@ -1,105 +1,171 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import AddProductForm from './AddProductForm';
+import { initialProducts } from './data/products';
+import api from './services/api';
+
+const categories = ['Todos', 'Camisetas', 'Calcas', 'Moletons', 'Jaquetas', 'Acessorios'];
 
 function AdminDashboard() {
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('Todos');
+  const [loading, setLoading] = useState(true);
 
-  const fetchProducts = () => {
-    axios.get('http://localhost:3333/products')
-      .then(response => setProducts(response.data))
-      .catch(error => console.error("Erro ao carregar produtos:", error));
-  };
+  const fetchProducts = useCallback(() => {
+    setLoading(true);
+    api.get('/products')
+      .then((response) => setProducts(Array.isArray(response.data) ? response.data : []))
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = category === 'Todos' || product.category === category;
+      return matchesSearch && matchesCategory;
+    });
+  }, [category, products, search]);
+
+  const stats = useMemo(() => ({
+    products: products.length,
+    stock: products.reduce((sum, product) => sum + Number(product.stock || 0), 0),
+    featured: products.filter((product) => product.featured).length
+  }), [products]);
+
+  const openCreateForm = () => {
+    setEditingProduct(null);
+    setShowForm(true);
+  };
+
+  const openEditForm = (product) => {
+    setEditingProduct(product);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const saveProduct = async (productData) => {
+    try {
+      if (editingProduct) {
+        await api.put(`/products/${editingProduct.id}`, productData);
+      } else {
+        await api.post('/products', productData);
+      }
+      fetchProducts();
+    } catch (error) {
+      alert(error.response?.data?.error || 'Erro ao salvar produto.');
+      setLoading(false);
+    }
+
+    setShowForm(false);
+    setEditingProduct(null);
+  };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Deseja mesmo excluir este produto?")) {
-      try {
-        await axios.delete(`http://localhost:3333/products/${id}`);
-        setProducts(products.filter(p => p.id !== id));
-      } catch (error) { alert("Erro ao excluir"); }
+    if (!window.confirm('Deseja mesmo excluir este produto?')) return;
+
+    try {
+      await api.delete(`/products/${id}`);
+      fetchProducts();
+    } catch (error) {
+      alert(error.response?.data?.error || 'Erro ao excluir produto.');
+      setLoading(false);
     }
   };
 
-  const styles = {
-    container: { minHeight: '100vh', backgroundColor: '#09090b', color: '#f4f4f5', padding: '40px', fontFamily: 'Inter, sans-serif' },
-    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', borderBottom: '1px solid #27272a', paddingBottom: '20px' },
-    title: { fontSize: '32px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px' },
-    buttonAdd: { backgroundColor: '#ffffff', color: '#000000', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold', border: 'none', cursor: 'pointer' },
-    tableCard: { backgroundColor: '#18181b', borderRadius: '12px', border: '1px solid #27272a', overflow: 'hidden' },
-    table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left' },
-    th: { backgroundColor: '#27272a', padding: '16px', fontSize: '12px', color: '#a1a1aa', textTransform: 'uppercase' },
-    td: { padding: '16px', borderBottom: '1px solid #27272a' },
-    price: { color: '#10b981', fontFamily: 'monospace', fontWeight: 'bold' },
-    tag: { backgroundColor: '#27272a', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', marginRight: '5px', border: '1px solid #3f3f46' },
-    btnAction: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', marginRight: '10px' }
-  };
-
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
+    <main className="admin-page">
+      <header className="admin-header">
         <div>
-          <h1 style={styles.title}>SWAG_SIDE ADMIN</h1>
-          <p style={{ color: '#71717a', fontSize: '14px' }}>Gerenciamento de Estoque Profissional</p>
+          <p className="eyebrow">RBAC ADMIN</p>
+          <h1>PAINEL SWEG SIDE</h1>
+          <span>Rota protegida para gerenciar catalogo, estoque e destaques.</span>
         </div>
-        <button 
-          style={styles.buttonAdd}
-          onClick={() => { setShowForm(!showForm); if(showForm) setEditingProduct(null); }}
-        >
-          {showForm ? 'FECHAR' : '+ NOVO PRODUTO'}
-        </button>
+        <button className="primary-button" onClick={openCreateForm}>NOVO PRODUTO</button>
       </header>
 
+      <section className="stats-grid">
+        <div><span>Produtos</span><strong>{stats.products}</strong></div>
+        <div><span>Itens em estoque</span><strong>{stats.stock}</strong></div>
+        <div><span>Destaques</span><strong>{stats.featured}</strong></div>
+      </section>
+
       {showForm && (
-        <div style={{ marginBottom: '40px' }}>
-          <AddProductForm 
-            editingProduct={editingProduct} 
-            onProductSaved={() => { fetchProducts(); setShowForm(false); setEditingProduct(null); }} 
-          />
-        </div>
+        <AddProductForm
+          editingProduct={editingProduct}
+          onProductSaved={saveProduct}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingProduct(null);
+          }}
+        />
       )}
 
-      <div style={styles.tableCard}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Produto</th>
-              <th style={styles.th}>Preço</th>
-              <th style={styles.th}>Tamanhos</th>
-              <th style={{ ...styles.th, textAlign: 'right', paddingRight: '20px' }}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(product => (
-              <tr key={product.id}>
-                <td style={styles.td}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <div style={{ width: '40px', height: '40px', backgroundColor: '#27272a', borderRadius: '6px' }}></div>
-                    <span style={{ fontWeight: 'bold' }}>{product.name}</span>
-                  </div>
-                </td>
-                <td style={styles.td}>
-                   {/* Aqui corrigimos o erro do toFixed transformando em Number antes */}
-                  <span style={styles.price}>R$ {Number(product.price).toFixed(2)}</span>
-                </td>
-                <td style={styles.td}>
-                  {product.sizes.map(s => <span key={s} style={styles.tag}>{s}</span>)}
-                </td>
-                <td style={{ ...styles.td, textAlign: 'right' }}>
-                  <button style={styles.btnAction} onClick={() => { setEditingProduct(product); setShowForm(true); }}>✏️</button>
-                  <button style={styles.btnAction} onClick={() => handleDelete(product.id)}>🗑️</button>
-                </td>
+      <section className="admin-panel">
+        <div className="admin-toolbar">
+          <div>
+            <h2>PRODUTOS</h2>
+            <p>{loading ? 'Sincronizando...' : `${filteredProducts.length} item(ns) encontrados`}</p>
+          </div>
+          <div className="catalog-filters">
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="BUSCAR PRODUTO" />
+            <select value={category} onChange={(event) => setCategory(event.target.value)}>
+              {categories.map((item) => <option key={item}>{item}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Preco</th>
+                <th>Estoque</th>
+                <th>Cores</th>
+                <th>Acoes</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {filteredProducts.map((product) => (
+                <tr key={product.id}>
+                  <td>
+                    <div className="admin-product">
+                      <img src={product.images?.[0]?.url || initialProducts[0].images[0].url} alt={product.name} />
+                      <div>
+                        <strong>{product.name}</strong>
+                        {product.featured && <span>Destaque</span>}
+                      </div>
+                    </div>
+                  </td>
+                  <td>{product.category || '-'}</td>
+                  <td>R$ {Number(product.price).toFixed(2)}</td>
+                  <td>{product.stock ?? 0}</td>
+                  <td>
+                    <div className="color-dots">
+                      {(product.colors || []).map((color) => <span key={color} style={{ backgroundColor: color }} />)}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="row-actions">
+                      <button onClick={() => openEditForm(product)}>EDITAR</button>
+                      <button onClick={() => handleDelete(product.id)}>EXCLUIR</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
   );
 }
 

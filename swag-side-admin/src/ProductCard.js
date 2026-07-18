@@ -1,52 +1,54 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const CardStyles = {
-  container: { 
-    backgroundColor: '#242424', 
-    padding: '15px',
-    borderRadius: '4px',
-    textAlign: 'left'
-  },
-  imageBox: { 
-    width: '100%', 
-    aspectRatio: '1/1', 
-    backgroundColor: '#121212', 
-    overflow: 'hidden', 
-    marginBottom: '15px' 
-  },
-  img: { width: '100%', height: '100%', objectFit: 'cover' },
-  name: { fontSize: '12px', fontWeight: '900', color: '#fff', marginBottom: '5px', textTransform: 'uppercase' },
-  price: { fontSize: '12px', color: '#888', fontFamily: 'monospace', marginBottom: '15px' },
-  button: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#e2e2e2',
-    color: '#000',
-    border: 'none',
-    fontWeight: '900',
-    fontSize: '10px',
-    cursor: 'pointer',
-    textTransform: 'uppercase',
-    letterSpacing: '1px'
-  }
-};
+const fallbackImage = 'https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=900&auto=format&fit=crop';
 
-function ProductCard({ product, addToCart }) {
-  const mainImage = product.images && product.images.length > 0 
-    ? product.images[0].url 
-    : 'https://via.placeholder.com/400x400?text=SWAG_SIDE';
+function ProductCard({ product, addToCart, badge, variant = '' }) {
+  const sizes = useMemo(() => product.sizes || [], [product.sizes]);
+  const [selectedSize, setSelectedSize] = useState(sizes[0] || 'Unico');
+  const mainImage = product.images?.[0]?.url || product.imageUrl || fallbackImage;
+  const colors = product.colors || ['#111111', '#ffffff', '#8d8a82'];
 
   return (
-    <div style={CardStyles.container}>
-      <div style={CardStyles.imageBox}>
-        <img src={mainImage} alt={product.name} style={CardStyles.img} />
+    <article className={`product-card ${variant ? `product-card-${variant}` : ''}`}>
+      <Link to={`/products/${product.id}`} className="product-media" aria-label={`Ver ${product.name}`}>
+        {badge && <span className="product-badge">{badge}</span>}
+        <img src={mainImage} alt={product.name} />
+      </Link>
+
+      <div className="product-info">
+        <div>
+          <Link to={`/products/${product.id}`}>
+            <h3>{product.name}</h3>
+          </Link>
+          <div className="color-dots" aria-label="Cores disponiveis">
+            {colors.map((color) => (
+              <span key={color} style={{ backgroundColor: color }} />
+            ))}
+          </div>
+        </div>
+        <strong>R$ {Number(product.price).toFixed(2)}</strong>
       </div>
-      <h3 style={CardStyles.name}>{product.name}</h3>
-      <p style={CardStyles.price}>R$ {Number(product.price).toFixed(2)}</p>
-      <button style={CardStyles.button} onClick={() => addToCart(product)}>
-        + Add to Drop
+
+      {sizes.length > 0 && (
+        <div className="size-row" aria-label="Tamanhos disponiveis">
+          {sizes.map((size) => (
+            <button
+              key={size}
+              type="button"
+              className={selectedSize === size ? 'active' : ''}
+              onClick={() => setSelectedSize(size)}
+            >
+              {size}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <button className="add-button" onClick={() => addToCart(product, selectedSize)}>
+        ADICIONAR
       </button>
-    </div>
+    </article>
   );
 }
 

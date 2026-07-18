@@ -1,36 +1,45 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const compression = require('compression');
+const cookieParser = require('cookie-parser');
 const routes = require('./routes/routes');
+const env = require('./config/env');
+const errorHandler = require('./middlewares/errorHandler');
+const notFound = require('./middlewares/notFound');
 
 const app = express();
 
-// --- MIDDLEWARES (Configurações) ---
+app.set('trust proxy', 1);
+app.use(helmet());
+app.use(compression());
+app.use(cookieParser());
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || env.corsOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-// Libera o acesso para o Frontend (React) do Geovanni
-app.use(cors()); 
+    return callback(new Error('Origem nao permitida pelo CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+}));
 
-// Permite que o servidor entenda dados enviados em formato JSON
-app.use(express.json());
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: env.nodeEnv === 'production' ? 300 : 1000,
+  standardHeaders: true,
+  legacyHeaders: false
+}));
 
-// --- ROTAS ---
-
-// Carrega as rotas de produtos e pedidos
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(routes);
+app.use(notFound);
+app.use(errorHandler);
 
-// --- TRATAMENTO DE ERROS (Robustez) ---
-
-// Se qualquer rota der erro, esse bloco impede o servidor de cair
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: 'Algo deu errado no servidor!',
-    message: err.message
-  });
-});
-
-// --- INICIALIZAÇÃO ---
-
-const PORT = 3333;
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+app.listen(env.port, () => {
+  console.log(`Servidor rodando em http://localhost:${env.port}`);
 });

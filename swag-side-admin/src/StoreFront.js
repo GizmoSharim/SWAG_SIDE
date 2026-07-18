@@ -1,88 +1,176 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard';
+import api from './services/api';
+import { getStoredProducts, initialProducts, storeProducts } from './data/products';
 
-function StoreFront({ cart, addToCart }) {
-  const [products, setProducts] = useState([]);
+const heroImage = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1800&auto=format&fit=crop';
+const bannerOne = 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1200&auto=format&fit=crop';
+const bannerTwo = 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop';
+
+function StoreFront({ cart, total, addToCart, removeFromCart, updateCartQuantity, clearCart, cartOpen, closeCart }) {
+  const [products, setProducts] = useState(getStoredProducts);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:3333/products')
-      .then(response => setProducts(response.data))
-      .catch(error => console.error("Erro na vitrine:", error));
+    api.get('/products')
+      .then((response) => {
+        const apiProducts = Array.isArray(response.data) && response.data.length ? response.data : initialProducts;
+        setProducts(apiProducts);
+        storeProducts(apiProducts);
+      })
+      .catch(() => {
+        const seeded = getStoredProducts();
+        setProducts(seeded.length ? seeded : initialProducts);
+        storeProducts(seeded.length ? seeded : initialProducts);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const checkoutWhatsApp = () => {
-    const numeroZap = "5592984052457"; // TROCA PRO NUMERO DO NIKOLAS
-    
-    // 1. Agrupar itens repetidos e calcular subtotal
-    const resumoItens = cart.reduce((acc, item) => {
-      acc[item.name] = (acc[item.name] || 0) + 1;
-      return acc;
-    }, {});
+  const featuredProducts = useMemo(
+    () => products.filter((product) => product.featured).slice(0, 4),
+    [products]
+  );
 
-    const listaTexto = Object.entries(resumoItens)
-      .map(([nome, qtd]) => `▪️ *${qtd}x* ${nome.toUpperCase()}`)
-      .join('\n');
-
-    const total = cart.reduce((acc, item) => acc + Number(item.price), 0);
-    
-    // 2. Montar a "Nota Fiscal" Estilizada
-    const mensagem = encodeURIComponent(
-      ` *SWAG_SIDE - NOVO DROP REQUEST*\n` +
-      `________________________________\n\n` +
-      `Salve, pessoal da SwegSide! Acabei de montar meu kit no site e quero fechar:\n\n` +
-      `${listaTexto}\n\n` +
-      ` *VALOR TOTAL:* R$ ${total.toFixed(2)}\n` +
-      `________________________________\n\n` +
-      ` *DADOS DO CLIENTE*\n` +
-      `Nome:\n` +
-      `Endereço de Entrega:\n\n` +
-      `*Aguardo as instruções para o PIX!* ⚡`
-    );
-
-    window.open(`https://wa.me/${numeroZap}?text=${mensagem}`, '_blank');
-  };
-
-  const swagStyles = {
-    wrapper: { backgroundColor: '#1c1c1c', minHeight: '100vh', color: '#e2e2e2', fontFamily: 'Arial, sans-serif' },
-    hero: { 
-      width: '100%', height: '60vh', backgroundColor: '#121212', 
-      backgroundImage: 'url("https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1974&auto=format&fit=crop")',
-      backgroundSize: 'cover', backgroundPosition: 'center',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-    },
-    grid: { maxWidth: '1200px', margin: '60px auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '30px', padding: '0 20px' },
-    cartFloat: {
-      position: 'fixed', bottom: '30px', right: '30px', backgroundColor: '#e2e2e2', color: '#000',
-      padding: '20px', borderRadius: '4px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', zIndex: 1000, textAlign: 'center'
-    }
-  };
+  const fallbackFeatured = featuredProducts.length >= 4 ? featuredProducts : initialProducts;
 
   return (
-    <div style={swagStyles.wrapper}>
-      <div style={swagStyles.hero}>
-        <h2 style={{ fontSize: '60px', fontWeight: '900', margin: 0, letterSpacing: '-3px' }}>SEASON 2026</h2>
-        <p style={{ letterSpacing: '5px', fontSize: '12px', color: '#888' }}>DESIGNED IN AMAZONAS</p>
-      </div>
-
-      <div style={swagStyles.grid}>
-        {products.map(product => (
-          <ProductCard key={product.id} product={product} addToCart={addToCart} />
-        ))}
-      </div>
-
-      {cart.length > 0 && (
-        <div style={swagStyles.cartFloat}>
-          <p style={{ fontWeight: '900', fontSize: '12px', marginBottom: '10px' }}>{cart.length} ITENS NO DROP</p>
-          <button 
-            onClick={checkoutWhatsApp}
-            style={{ backgroundColor: '#000', color: '#fff', padding: '10px 20px', border: 'none', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}
-          >
-            FINALIZAR NO WHATSAPP
-          </button>
+    <main className="store-page">
+      <section id="home" className="hero-banner">
+        <img src={heroImage} alt="Editorial urbano SWEG SIDE" />
+        <div className="hero-copy">
+          <p className="eyebrow">DROP 06</p>
+          <h1>SWEG SIDE</h1>
+          <span>Streetwear minimalista para rotina real.</span>
+          <a href="#destaques" className="primary-button">COMPRAR AGORA</a>
         </div>
-      )}
-    </div>
+      </section>
+
+      <section id="destaques" className="featured-section">
+        <div className="section-heading">
+          <h2>DESTAQUES DA SEMANA</h2>
+          <span>{loading ? 'CARREGANDO' : `${products.length} PECAS`}</span>
+        </div>
+
+        <div className="product-grid">
+          {fallbackFeatured.slice(0, 4).map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              addToCart={addToCart}
+              badge={product.featured ? 'HOT' : ''}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section id="drop" className="bento-section">
+        <article className="bento-tile large">
+          <img src={bannerOne} alt="Colecao oversized SWEG SIDE" />
+          <div>
+            <h2>OVERSIZED SYSTEM</h2>
+            <a href="#destaques">VER DROP</a>
+          </div>
+        </article>
+        <article className="bento-tile">
+          <img src={bannerTwo} alt="Techwear SWEG SIDE" />
+          <div>
+            <h2>TECH TROUSERS</h2>
+            <a href="#destaques">EXPLORAR</a>
+          </div>
+        </article>
+        <article className="bento-copy">
+          <p>FABRICACAO LIMITADA</p>
+          <h2>LINHAS LIMPAS, PESO CERTO, RUA SEM EXCESSO.</h2>
+          <span>SWEG SIDE trabalha drops pequenos com pecas essenciais, cores neutras e modelagem direta.</span>
+        </article>
+      </section>
+
+      <div className={`cart-backdrop ${cartOpen ? 'is-open' : ''}`} onClick={closeCart} />
+
+      <aside id="carrinho" className={`cart-drawer ${cartOpen ? 'is-open' : ''}`} aria-hidden={!cartOpen}>
+        <div className="cart-header">
+          <div>
+            <p className="eyebrow">Pedido</p>
+            <h2>CARRINHO</h2>
+          </div>
+          <button onClick={closeCart} aria-label="Fechar carrinho">X</button>
+        </div>
+
+        {cart.length === 0 ? (
+          <div className="cart-empty">
+            <strong>CARRINHO VAZIO</strong>
+            <span>Adicione uma peca para iniciar o pedido.</span>
+            <button onClick={closeCart}>CONTINUAR COMPRANDO</button>
+          </div>
+        ) : (
+          <>
+            <div className="cart-items">
+              {cart.map((item) => (
+                <div className="cart-item" key={item.cartKey}>
+                  <img src={item.imageUrl || initialProducts[0].images[0].url} alt={item.name} />
+                  <div>
+                    <h3>{item.name}</h3>
+                    <p>Tam: {item.selectedSize || 'Unico'}</p>
+                    <span>R$ {Number(item.price).toFixed(2)}</span>
+                  </div>
+                  <div className="qty-control">
+                    <button onClick={() => updateCartQuantity(item.cartKey, item.quantity - 1)}>-</button>
+                    <input
+                      value={item.quantity}
+                      onChange={(event) => updateCartQuantity(item.cartKey, event.target.value)}
+                      aria-label={`Quantidade de ${item.name}`}
+                    />
+                    <button onClick={() => updateCartQuantity(item.cartKey, item.quantity + 1)}>+</button>
+                    <button className="remove-button" onClick={() => removeFromCart(item.cartKey)}>REMOVER</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="cart-footer">
+              <button className="clear-cart-button" onClick={clearCart}>LIMPAR CARRINHO</button>
+              <div>
+                <span>Total</span>
+                <strong>R$ {total.toFixed(2)}</strong>
+              </div>
+              <Link to="/checkout" onClick={closeCart} className="whatsapp-button">IR PARA CHECKOUT</Link>
+            </div>
+          </>
+        )}
+      </aside>
+
+      <footer id="footer" className="site-footer">
+        <div>
+          <strong>SWEG SIDE</strong>
+          <span>Streetwear minimalista.</span>
+          <span>Drop semanal. Estoque limitado.</span>
+        </div>
+        <div>
+          <strong>NAVEGACAO</strong>
+          <a href="#home">Home</a>
+          <a href="#destaques">Destaques</a>
+          <a href="#drop">Drop</a>
+        </div>
+        <div>
+          <strong>SUPORTE</strong>
+          <span>WhatsApp</span>
+          <span>Trocas e devolucoes</span>
+          <span>Entrega nacional</span>
+        </div>
+        <div>
+          <strong>REDES</strong>
+          <span>Instagram</span>
+          <span>TikTok</span>
+          <span>Pinterest</span>
+        </div>
+        <form>
+          <strong>NEWSLETTER</strong>
+          <input type="email" placeholder="SEU EMAIL" aria-label="Email newsletter" />
+          <button type="button">ENTRAR</button>
+        </form>
+      </footer>
+    </main>
   );
 }
 

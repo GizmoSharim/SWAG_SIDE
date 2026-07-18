@@ -1,90 +1,153 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
-function AddProductForm({ editingProduct, onProductSaved }) {
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    sizes: '',
-    images: ''
-  });
+const emptyForm = {
+  name: '',
+  description: '',
+  price: '',
+  category: 'Camisetas',
+  stock: 0,
+  featured: false,
+  colors: '#111111, #ffffff, #8d8a82',
+  sizes: 'P, M, G, GG',
+  images: ''
+};
+
+function AddProductForm({ editingProduct, onProductSaved, onCancel }) {
+  const [formData, setFormData] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (editingProduct) {
       setFormData({
-        name: editingProduct.name,
-        description: editingProduct.description,
-        price: editingProduct.price,
-        sizes: editingProduct.sizes.join(', '),
-        images: editingProduct.images?.map(img => img.url).join(', ') || ''
+        name: editingProduct.name || '',
+        description: editingProduct.description || '',
+        price: editingProduct.price || '',
+        category: editingProduct.category || 'Camisetas',
+        stock: editingProduct.stock ?? 0,
+        featured: Boolean(editingProduct.featured),
+        colors: editingProduct.colors?.join(', ') || '',
+        sizes: editingProduct.sizes?.join(', ') || '',
+        images: editingProduct.images?.map((image) => image.url || image).join(', ') || ''
       });
+      return;
     }
+
+    setFormData(emptyForm);
   }, [editingProduct]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const productData = {
-      ...formData,
-      price: parseFloat(formData.price),
-      sizes: formData.sizes.split(',').map(s => s.trim()),
-      images: formData.images.split(',').map(url => url.trim())
-    };
-
-    try {
-      if (editingProduct) {
-        await axios.put(`http://localhost:3333/products/${editingProduct.id}`, productData);
-        alert("🔄 Produto atualizado!");
-      } else {
-        await axios.post('http://localhost:3333/products', productData);
-        alert("✅ Produto cadastrado!");
-      }
-      onProductSaved();
-    } catch (error) {
-      alert("❌ Erro ao salvar produto.");
-    }
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    setFormData((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
-  // Estilos Dark Swag
-  const s = {
-    form: { backgroundColor: '#18181b', padding: '30px', borderRadius: '16px', border: '1px solid #27272a', marginBottom: '30px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' },
-    label: { display: 'block', color: '#a1a1aa', fontSize: '12px', marginBottom: '8px', fontWeight: '600', textTransform: 'uppercase' },
-    input: { width: '100%', backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', padding: '12px', color: '#fff', marginBottom: '20px', outline: 'none', fontSize: '14px' },
-    button: { width: '100%', padding: '14px', backgroundColor: editingProduct ? '#3b82f6' : '#fff', color: editingProduct ? '#fff' : '#000', borderRadius: '8px', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '16px', transition: '0.2s' }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+
+    const productData = {
+      ...formData,
+      price: Number(formData.price),
+      stock: Number(formData.stock),
+      colors: formData.colors.split(',').map((color) => color.trim()).filter(Boolean),
+      sizes: formData.sizes.split(',').map((size) => size.trim()).filter(Boolean),
+      images: formData.images.split(',').map((url) => ({ url: url.trim() })).filter((image) => image.url)
+    };
+
+    await onProductSaved(productData);
+    setFormData(emptyForm);
+    setSaving(false);
+  };
+
+  const handleImageUpload = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    Promise.all(files.map((file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    })))
+      .then((urls) => {
+        setFormData((current) => ({
+          ...current,
+          images: [current.images, ...urls].filter(Boolean).join(', ')
+        }));
+      })
+      .catch(() => alert('Nao foi possivel carregar a imagem.'));
   };
 
   return (
-    <form onSubmit={handleSubmit} style={s.form}>
-      <h2 style={{ marginBottom: '25px', fontSize: '20px', fontWeight: '800' }}>
-        {editingProduct ? 'EDITAR PRODUTO' : 'NOVO PRODUTO'}
-      </h2>
-
-      <label style={s.label}>Nome da Peça</label>
-      <input type="text" placeholder="Ex: Camisa Oversized Midnight" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required style={s.input} />
-
-      <label style={s.label}>Descrição</label>
-      <textarea rows="3" placeholder="Detalhes do material, caimento..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required style={{...s.input, resize: 'none'}} />
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+    <form onSubmit={handleSubmit} className="admin-form">
+      <div className="form-heading">
         <div>
-          <label style={s.label}>Preço (R$)</label>
-          <input type="number" step="0.01" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required style={s.input} />
+          <p className="eyebrow">Catalogo</p>
+          <h2>{editingProduct ? 'EDITAR PRODUTO' : 'NOVO PRODUTO'}</h2>
         </div>
-        <div>
-          <label style={s.label}>Tamanhos (separe por vírgula)</label>
-          <input type="text" placeholder="P, M, G, GG" value={formData.sizes} onChange={e => setFormData({...formData, sizes: e.target.value})} required style={s.input} />
-        </div>
+        <button type="button" onClick={onCancel}>CANCELAR</button>
       </div>
 
-      {!editingProduct && (
-        <>
-          <label style={s.label}>URLs das Imagens (mínimo 3, separe por vírgula)</label>
-          <input type="text" placeholder="http://link-da-foto.com/1.jpg, ..." value={formData.images} onChange={e => setFormData({...formData, images: e.target.value})} required style={s.input} />
-        </>
-      )}
+      <div className="form-grid">
+        <label>
+          Nome da peca
+          <input name="name" value={formData.name} onChange={handleChange} required />
+        </label>
+        <label>
+          Preco
+          <input name="price" type="number" step="0.01" min="0" value={formData.price} onChange={handleChange} required />
+        </label>
+        <label>
+          Categoria
+          <select name="category" value={formData.category} onChange={handleChange}>
+            <option>Camisetas</option>
+            <option>Calcas</option>
+            <option>Moletons</option>
+            <option>Jaquetas</option>
+            <option>Acessorios</option>
+          </select>
+        </label>
+        <label>
+          Estoque
+          <input name="stock" type="number" min="0" value={formData.stock} onChange={handleChange} required />
+        </label>
+      </div>
 
-      <button type="submit" style={s.button}>
-        {editingProduct ? 'SALVAR ALTERAÇÕES' : 'CONFIRMAR CADASTRO'}
+      <label>
+        Descricao
+        <textarea name="description" rows="3" value={formData.description} onChange={handleChange} required />
+      </label>
+
+      <div className="form-grid two">
+        <label>
+          Cores HEX
+          <input name="colors" value={formData.colors} onChange={handleChange} placeholder="#111111, #ffffff" required />
+        </label>
+        <label>
+          Tamanhos disponiveis
+          <input name="sizes" value={formData.sizes} onChange={handleChange} placeholder="P, M, G, GG" required />
+        </label>
+      </div>
+
+      <label>
+        URLs das imagens
+        <input name="images" value={formData.images} onChange={handleChange} placeholder="https://imagem-1.jpg, https://imagem-2.jpg" />
+      </label>
+
+      <label>
+        Upload de imagens
+        <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
+      </label>
+
+      <label className="checkbox-line">
+        <input name="featured" type="checkbox" checked={formData.featured} onChange={handleChange} />
+        Marcar como destaque da semana
+      </label>
+
+      <button className="primary-button wide" disabled={saving}>
+        {saving ? 'SALVANDO...' : editingProduct ? 'SALVAR ALTERACOES' : 'CADASTRAR PRODUTO'}
       </button>
     </form>
   );

@@ -1,38 +1,31 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const OrderService = require('../services/OrderService');
+const asyncHandler = require('../utils/asyncHandler');
 
 const OrderController = {
-  async store(req, res) {
-    console.log("Dados recebidos no Body:", req.body); 
+  store: asyncHandler(async (req, res) => {
+    const order = await OrderService.createOrder(req.body, req.user?.id);
+    return res.status(201).json(order);
+  }),
 
-    try {
-      // Verificando se o prisma.order existe antes de tentar criar
-      if (!prisma.order) {
-        throw new Error("A tabela 'order' não foi encontrada no Prisma. Verifique seu schema.prisma");
-      }
+  index: asyncHandler(async (req, res) => {
+    const orders = await OrderService.listOrders();
+    return res.json(orders);
+  }),
 
-      const { customerName, whatsapp, total, items } = req.body;
+  show: asyncHandler(async (req, res) => {
+    const order = await OrderService.findById(req.params.id);
+    return res.json(order);
+  }),
 
-      const order = await prisma.order.create({
-        data: {
-          customerName: customerName,
-          whatsapp: whatsapp,
-          total: Number(total), 
-          items: items, 
-          status: "AGUARDANDO_WHATSAPP" 
-        }
-      });
-
-      return res.status(201).json(order);
-
-    } catch (error) {
-      console.error("ERRO NO CONTROLADOR:", error);
-      return res.status(500).json({ 
-        error: "Erro ao registrar intenção de compra",
-        details: error.message 
-      });
-    }
-  }
+  updateStatus: asyncHandler(async (req, res) => {
+    const order = await OrderService.updateStatus(
+      req.params.id,
+      req.body.status,
+      req.body.note,
+      req.user?.id
+    );
+    return res.json(order);
+  })
 };
 
 module.exports = OrderController;
