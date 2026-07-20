@@ -54,6 +54,20 @@ export const initialProducts = [
     images: [
       { url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1000&auto=format&fit=crop' }
     ]
+  },
+  {
+    id: 'swg-005',
+    name: 'Urban Sneakers',
+    description: 'Tenis urbano de silhueta limpa para completar o drop.',
+    price: 299.9,
+    category: 'Calçados',
+    stock: 14,
+    featured: true,
+    colors: ['#111111', '#ffffff', '#6b6b6b'],
+    sizes: ['38', '39', '40', '41', '42'],
+    images: [
+      { url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop' }
+    ]
   }
 ];
 

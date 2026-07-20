@@ -119,6 +119,7 @@ function AddProductForm({ editingProduct, onProductSaved, onCancel }) {
             <option>Moletons</option>
             <option>Jaquetas</option>
             <option>Acessorios</option>
+            <option>Calçados</option>
           </select>
         </label>
         <label>

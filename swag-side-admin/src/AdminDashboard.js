@@ -3,7 +3,7 @@ import AddProductForm from './AddProductForm';
 import { initialProducts } from './data/products';
 import api from './services/api';
 
-const categories = ['Todos', 'Camisetas', 'Calcas', 'Moletons', 'Jaquetas', 'Acessorios'];
+const categories = ['Todos', 'Camisetas', 'Calcas', 'Moletons', 'Jaquetas', 'Acessorios', 'Calçados'];
 
 function AdminDashboard() {
   const [products, setProducts] = useState([]);

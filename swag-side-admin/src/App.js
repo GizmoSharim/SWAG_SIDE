@@ -129,8 +129,12 @@ function AppShell() {
     setCartOpen(false);
   };
 
-  const handleSectionClick = (event, sectionId) => {
+  const handleSectionClick = (event, sectionId, categoryFilter = null) => {
     event.preventDefault();
+    if (categoryFilter) {
+      window.dispatchEvent(new CustomEvent('swag-filter-category', { detail: { category: categoryFilter } }));
+    }
+
     const section = document.getElementById(sectionId);
     if (section) {
       section.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -147,6 +151,8 @@ function AppShell() {
 
           <div className="nav-links">
             <a href="#home" onClick={(event) => handleSectionClick(event, 'home')}>Home</a>
+            <a href="#destaques" onClick={(event) => handleSectionClick(event, 'destaques', 'Roupas')}>Roupas</a>
+            <a href="#destaques" onClick={(event) => handleSectionClick(event, 'destaques', 'Calçados')}>Calçados</a>
             <a href="#destaques" onClick={(event) => handleSectionClick(event, 'destaques')}>Destaques</a>
             <a href="#drop" onClick={(event) => handleSectionClick(event, 'drop')}>Drop</a>
             <a href="#footer" onClick={(event) => handleSectionClick(event, 'footer')}>Contato</a>

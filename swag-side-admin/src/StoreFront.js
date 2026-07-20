@@ -33,15 +33,28 @@ function StoreFront({ cart, total, addToCart, removeFromCart, updateCartQuantity
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    const handleCategoryFilter = (event) => {
+      setSearch('');
+      setCategory(event.detail?.category || 'Todos');
+    };
+
+    window.addEventListener('swag-filter-category', handleCategoryFilter);
+    return () => window.removeEventListener('swag-filter-category', handleCategoryFilter);
+  }, []);
+
   const categories = useMemo(
-    () => ['Todos', ...new Set(products.map((product) => product.category).filter(Boolean))],
+    () => ['Todos', 'Roupas', ...new Set(products.map((product) => product.category).filter(Boolean))],
     [products]
   );
 
   const visibleProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = category === 'Todos' || product.category === category;
+      const matchesCategory =
+        category === 'Todos' ||
+        (category === 'Roupas' && product.category !== 'Calçados') ||
+        product.category === category;
       return matchesSearch && matchesCategory;
     });
   }, [category, products, search]);
