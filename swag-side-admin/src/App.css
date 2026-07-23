@@ -431,6 +431,21 @@
   transform: translateX(0);
 }
 
+.cart-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 90;
+  border: 1px solid #000;
+  background: #000;
+  color: #fff;
+  padding: 14px 18px;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .cart-header,
 .cart-footer {
   padding: 22px;
@@ -1003,8 +1018,8 @@ button:disabled,
   }
 
   .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
   }
 
   .product-info {
@@ -1019,6 +1034,12 @@ button:disabled,
 
   .cart-drawer {
     width: min(100vw, 420px);
+  }
+
+  .cart-toast {
+    right: 16px;
+    bottom: 16px;
+    max-width: calc(100vw - 32px);
   }
 
   .qty-control {
@@ -1093,19 +1114,76 @@ button:disabled,
     overflow-wrap: anywhere;
   }
 
-  .product-grid,
   .site-footer,
   .form-grid,
   .form-grid.two {
     grid-template-columns: 1fr;
   }
 
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .product-card {
+    gap: 8px;
+  }
+
   .product-media {
-    aspect-ratio: 1 / 1.15;
+    aspect-ratio: 1 / 1.2;
+  }
+
+  .product-badge {
+    top: 7px;
+    left: 7px;
+    padding: 5px 7px;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .product-info {
+    gap: 5px;
+  }
+
+  .product-info h3 {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    overflow-wrap: anywhere;
+  }
+
+  .product-info strong {
+    font-size: 10px;
+    white-space: normal;
+  }
+
+  .color-dots {
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .color-dots span {
+    width: 9px;
+    height: 9px;
+  }
+
+  .size-row {
+    gap: 5px;
+  }
+
+  .size-row button {
+    min-width: 28px;
+    height: 28px;
+    font-size: 9px;
+  }
+
+  .product-card .add-button {
+    min-height: 36px;
+    padding: 0 6px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
   }
 
   .primary-button,
-  .add-button,
   .whatsapp-button,
   .clear-cart-button {
     width: 100%;
@@ -1114,6 +1192,12 @@ button:disabled,
   .cart-drawer {
     width: 100vw;
     border-left: 0;
+  }
+
+  .cart-toast {
+    left: 16px;
+    right: 16px;
+    text-align: center;
   }
 
   .cart-header,

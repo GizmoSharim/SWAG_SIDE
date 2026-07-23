@@ -45,9 +45,70 @@ function ProtectedAdmin({ children }) {
   return isAdmin ? children : <Navigate to="/login" replace state={{ from: '/admin' }} />;
 }
 
+function CartDrawer({ cart, total, isOpen, closeCart, removeFromCart, updateCartQuantity, clearCart }) {
+  return (
+    <>
+      <div className={`cart-backdrop ${isOpen ? 'is-open' : ''}`} onClick={closeCart} />
+
+      <aside id="carrinho" className={`cart-drawer ${isOpen ? 'is-open' : ''}`} aria-hidden={!isOpen}>
+        <div className="cart-header">
+          <div>
+            <p className="eyebrow">Pedido</p>
+            <h2>CARRINHO</h2>
+          </div>
+          <button onClick={closeCart} aria-label="Fechar carrinho">X</button>
+        </div>
+
+        {cart.length === 0 ? (
+          <div className="cart-empty">
+            <strong>CARRINHO VAZIO</strong>
+            <span>Adicione uma peca para iniciar o pedido.</span>
+            <button onClick={closeCart}>CONTINUAR COMPRANDO</button>
+          </div>
+        ) : (
+          <>
+            <div className="cart-items">
+              {cart.map((item) => (
+                <div className="cart-item" key={item.cartKey}>
+                  {item.imageUrl ? <img src={item.imageUrl} alt={item.name} /> : <div className="cart-thumb-empty">SEM FOTO</div>}
+                  <div>
+                    <h3>{item.name}</h3>
+                    <p>Tam: {item.selectedSize || 'Unico'}</p>
+                    <span>R$ {Number(item.price).toFixed(2)}</span>
+                  </div>
+                  <div className="qty-control">
+                    <button onClick={() => updateCartQuantity(item.cartKey, item.quantity - 1)}>-</button>
+                    <input
+                      value={item.quantity}
+                      onChange={(event) => updateCartQuantity(item.cartKey, event.target.value)}
+                      aria-label={`Quantidade de ${item.name}`}
+                    />
+                    <button onClick={() => updateCartQuantity(item.cartKey, item.quantity + 1)}>+</button>
+                    <button className="remove-button" onClick={() => removeFromCart(item.cartKey)}>REMOVER</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="cart-footer">
+              <button className="clear-cart-button" onClick={clearCart}>LIMPAR CARRINHO</button>
+              <div>
+                <span>Total</span>
+                <strong>R$ {total.toFixed(2)}</strong>
+              </div>
+              <Link to="/checkout" onClick={closeCart} className="whatsapp-button">IR PARA CHECKOUT</Link>
+            </div>
+          </>
+        )}
+      </aside>
+    </>
+  );
+}
+
 function AppShell() {
   const { user, isAdmin, logout } = useAuth();
   const [cartOpen, setCartOpen] = useState(false);
+  const [cartMessage, setCartMessage] = useState('');
   const [cart, setCart] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(CART_KEY)) || [];
@@ -103,7 +164,15 @@ function AppShell() {
       ];
     });
     setCartOpen(true);
+    setCartMessage('Produto adicionado ao carrinho.');
   };
+
+  useEffect(() => {
+    if (!cartMessage) return undefined;
+
+    const timeoutId = window.setTimeout(() => setCartMessage(''), 2600);
+    return () => window.clearTimeout(timeoutId);
+  }, [cartMessage]);
 
   const removeFromCart = (cartKey) => {
     setCart((currentCart) => currentCart.filter((item) => item.cartKey !== cartKey));
@@ -186,14 +255,7 @@ function AppShell() {
           path="/"
           element={
             <StoreFront
-              cart={cart}
-              total={total}
               addToCart={addToCart}
-              removeFromCart={removeFromCart}
-              updateCartQuantity={updateCartQuantity}
-              clearCart={clearCart}
-              cartOpen={cartOpen}
-              closeCart={() => setCartOpen(false)}
             />
           }
         />
@@ -209,6 +271,18 @@ function AppShell() {
           }
         />
       </Routes>
+
+      <CartDrawer
+        cart={cart}
+        total={total}
+        isOpen={cartOpen}
+        closeCart={() => setCartOpen(false)}
+        removeFromCart={removeFromCart}
+        updateCartQuantity={updateCartQuantity}
+        clearCart={clearCart}
+      />
+
+      {cartMessage && <div className="cart-toast" role="status">{cartMessage}</div>}
     </Router>
   );
 }

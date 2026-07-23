@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard';
 import api from './services/api';
 import { getStoredProducts, initialProducts, storeProducts } from './data/products';
@@ -8,7 +7,7 @@ const heroImage = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?
 const bannerOne = 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1200&auto=format&fit=crop';
 const bannerTwo = 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop';
 
-function StoreFront({ cart, total, addToCart, removeFromCart, updateCartQuantity, clearCart, cartOpen, closeCart }) {
+function StoreFront({ addToCart }) {
   const [products, setProducts] = useState(getStoredProducts);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -131,60 +130,6 @@ function StoreFront({ cart, total, addToCart, removeFromCart, updateCartQuantity
           <span>SWEG SIDE trabalha drops pequenos com pecas essenciais, cores neutras e modelagem direta.</span>
         </article>
       </section>
-
-      <div className={`cart-backdrop ${cartOpen ? 'is-open' : ''}`} onClick={closeCart} />
-
-      <aside id="carrinho" className={`cart-drawer ${cartOpen ? 'is-open' : ''}`} aria-hidden={!cartOpen}>
-        <div className="cart-header">
-          <div>
-            <p className="eyebrow">Pedido</p>
-            <h2>CARRINHO</h2>
-          </div>
-          <button onClick={closeCart} aria-label="Fechar carrinho">X</button>
-        </div>
-
-        {cart.length === 0 ? (
-          <div className="cart-empty">
-            <strong>CARRINHO VAZIO</strong>
-            <span>Adicione uma peca para iniciar o pedido.</span>
-            <button onClick={closeCart}>CONTINUAR COMPRANDO</button>
-          </div>
-        ) : (
-          <>
-            <div className="cart-items">
-              {cart.map((item) => (
-                <div className="cart-item" key={item.cartKey}>
-                  {item.imageUrl ? <img src={item.imageUrl} alt={item.name} /> : <div className="cart-thumb-empty">SEM FOTO</div>}
-                  <div>
-                    <h3>{item.name}</h3>
-                    <p>Tam: {item.selectedSize || 'Unico'}</p>
-                    <span>R$ {Number(item.price).toFixed(2)}</span>
-                  </div>
-                  <div className="qty-control">
-                    <button onClick={() => updateCartQuantity(item.cartKey, item.quantity - 1)}>-</button>
-                    <input
-                      value={item.quantity}
-                      onChange={(event) => updateCartQuantity(item.cartKey, event.target.value)}
-                      aria-label={`Quantidade de ${item.name}`}
-                    />
-                    <button onClick={() => updateCartQuantity(item.cartKey, item.quantity + 1)}>+</button>
-                    <button className="remove-button" onClick={() => removeFromCart(item.cartKey)}>REMOVER</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="cart-footer">
-              <button className="clear-cart-button" onClick={clearCart}>LIMPAR CARRINHO</button>
-              <div>
-                <span>Total</span>
-                <strong>R$ {total.toFixed(2)}</strong>
-              </div>
-              <Link to="/checkout" onClick={closeCart} className="whatsapp-button">IR PARA CHECKOUT</Link>
-            </div>
-          </>
-        )}
-      </aside>
 
       <footer id="footer" className="site-footer">
         <div>
