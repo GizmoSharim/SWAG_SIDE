@@ -45,7 +45,7 @@ test('order schema requires at least one item', () => {
   assert.throws(() => createOrderSchema.parse({
     body: {
       customerName: 'Cliente',
-      whatsapp: '559299999999',
+      whatsapp: '5592992284048',
       total: 100,
       items: []
     }
