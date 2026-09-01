@@ -18,7 +18,9 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || env.corsOrigins.includes(origin)) {
+    const normalizedOrigin = origin?.replace(/\/$/, '');
+
+    if (!origin || env.corsOrigins.includes(normalizedOrigin)) {
       return callback(null, true);
     }
 

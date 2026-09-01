@@ -1,8 +1,11 @@
 require('dotenv').config();
 
 const parseList = (value, fallback) => {
-  if (!value) return fallback;
-  return value.split(',').map((item) => item.trim()).filter(Boolean);
+  const items = value
+    ? value.split(',').map((item) => item.trim()).filter(Boolean)
+    : fallback;
+
+  return items.map((item) => item.replace(/\/$/, ''));
 };
 
 module.exports = {
