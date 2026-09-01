@@ -17,6 +17,10 @@ module.exports = {
   accessTokenTtl: process.env.ACCESS_TOKEN_TTL || '15m',
   refreshTokenDays: Number(process.env.REFRESH_TOKEN_DAYS || 7),
   cookieSecure: process.env.COOKIE_SECURE === 'true',
+  supabase: {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_KEY
+  },
   cloudinary: {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME,
     apiKey: process.env.CLOUDINARY_API_KEY,

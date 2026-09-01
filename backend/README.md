@@ -31,6 +31,16 @@ npm.cmd run dev
 - `PATCH /orders/:id/status` Admin
 - `POST /uploads/images` Admin
 
+## Supabase
+
+Em producao, use o Supabase como PostgreSQL configurando `DATABASE_URL`.
+Se tambem precisar consumir APIs do Supabase no backend, configure:
+
+- `SUPABASE_URL`
+- `SUPABASE_KEY`
+
+O cliente CommonJS esta em `backend/supabase.js`.
+
 ## Admin seed
 
 - Email: `admin@swegside.com`

@@ -15,6 +15,7 @@ app.set('trust proxy', 1);
 app.use(helmet());
 app.use(compression());
 app.use(cookieParser());
+app.use(express.json());
 app.use(cors({
   origin(origin, callback) {
     if (!origin || env.corsOrigins.includes(origin)) {
